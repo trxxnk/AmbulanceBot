@@ -1,40 +1,37 @@
-"""
-This is a echo bot.
-It echoes any incoming text messages.
-"""
+import asyncio
 
-from aiogram import Bot, Dispatcher, executor, types
-import logging
+from aiogram import Bot, Dispatcher
+from config_data.config import Config, load_config
 
+from FSM.GetDataFSM import storage
 
-API_TOKEN = "5902292713:AAGlOd3ZJnvxV6Cnd_niOF2JWdZnmVIouOE"
-# Настройка вывода логов
-logging.basicConfig(
-    format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]\
-        %(message)s',
-    level=logging.INFO  # что нужно логировать
-)
+from lexicon.lexicon_ru import MAIN_MENU
 
-# Инициализация бота и диспетчера
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+from handlers import bot_command_handlers, user_call_handlers
 
 
-@dp.message_handler(commands=['start', 'help'])
-async def send_welcome(message: types.Message):
-    """
-    This handler will be called when user sends `/start` or `/help` command
-    """
-    await message.reply(
-        "Привет! Я бот скорой помощи.\nЕсли срочно нужна помощь, то нажми на кнопку SOS"
-    )
+async def main():
+    # Принимаем настройки
+    config_path = None
+    config: Config = load_config(config_path)
+
+    # Иницициализация бота, диспетчера
+    bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
+    dp = Dispatcher(storage=storage)
+
+    # Регистрируем роутеры из handlers
+    dp.include_routers(
+        bot_command_handlers.router,
+        user_call_handlers.router)
+
+    # Устанавливаем "Меню" бота
+    await bot.set_my_commands(MAIN_MENU)
+
+    # [Временно] Пропускаем накопившиеся апдейты
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    # Запускаем обработку апдейтов
+    await dp.start_polling(bot)
 
 
-@dp.message_handler()
-async def echo(message: types.Message):
-    await message.answer(message.text)
-
-
-if __name__ == '__main__':
-    # Запуск бота
-    executor.start_polling(dp, skip_updates=True)
+asyncio.run(main())

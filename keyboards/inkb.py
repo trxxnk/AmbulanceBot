@@ -1,71 +1,35 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from lexicon.lexicon_ru import LEXICON_RU, AGES_RU
+from lexicon.lexicon_ru import PromtRU, GendersRU, AgesRU
+from .callback_data import CancelCallCB
+
+# === Клавиатура <Выбрать пол> ===
+genders_inkb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+genders_buttons: list[InlineKeyboardButton] = [
+    InlineKeyboardButton(callback_data=key, text=value)
+    for key, value in GendersRU.GendersRU_dict.items()]
+genders_inkb_builder.row(*genders_buttons, width=2)
+GENDERS_INKB: InlineKeyboardMarkup = genders_inkb_builder.as_markup()
 
 
-# === Неизвестно ===
-buttons = [
-    [InlineKeyboardButton(
-        text=LEXICON_RU['unkown'],
-        callback_data='unkown_pressed')]
-]
+# === Клавиатура <Выбрать возраст> ===
+ages_buttons: list[InlineKeyboardButton] = [
+    [InlineKeyboardButton(callback_data=key, text=value)]
+    for key, value in AgesRU.AgesRU_dict.items()]
 
-unkown_kb: InlineKeyboardMarkup = InlineKeyboardMarkup(
-    inline_keyboard=buttons
-)
+AGES_INKB: InlineKeyboardMarkup = InlineKeyboardMarkup(
+    inline_keyboard=ages_buttons)
 # === /// ===
 
 
-# === Выбрать пол ===
-choose_sex_kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
-buttons: list[InlineKeyboardButton] = [
-    InlineKeyboardButton(
-        text=LEXICON_RU['man_gender'],
-        callback_data='man'),
-    InlineKeyboardButton(
-        text=LEXICON_RU['women_gender'],
-        callback_data='women'),
-    InlineKeyboardButton(
-        text=LEXICON_RU['unkown'],
-        callback_data='unkown_pressed'),
-]
-choose_sex_kb_builder.row(*buttons, width=2)
-choose_sex_kb: InlineKeyboardMarkup = choose_sex_kb_builder.as_markup()
-
-
-# === Выбрать возраст ===
-buttons: list[InlineKeyboardButton] = [
-    [InlineKeyboardButton(
-        text=txt,
-        callback_data=cb_data)] for cb_data, txt in AGES_RU._asdict().items()
-]
-
-choose_age_kb: InlineKeyboardMarkup = InlineKeyboardMarkup(
-    inline_keyboard=buttons
-)
-# === /// ===
-
-# === Да / Нет для отмены вызова ===
-buttons: list[list[InlineKeyboardButton]] = [
-    [InlineKeyboardButton(
-        text=LEXICON_RU['yes'],
-        callback_data='yes_cancel')],
-    [InlineKeyboardButton(
-        text=LEXICON_RU['no'],
-        callback_data='no_cancel')]
-]
-
-yes_no_inkb: InlineKeyboardMarkup = InlineKeyboardMarkup(
-    inline_keyboard=buttons)
-# === /// ===
-
-# === Продолжить вызов / заполнение данных ===
-buttons: list[list[InlineKeyboardButton]] = [
-    [InlineKeyboardButton(
-        text=LEXICON_RU['continue'],
-        callback_data='continue_call')],
-]
-continue_inkb: InlineKeyboardMarkup = InlineKeyboardMarkup(
-    inline_keyboard=buttons
-)
+# === Клавиатура <Да/Нет> для отмены вызова ===
+YES_CANCEL_CALL: InlineKeyboardButton = InlineKeyboardButton(
+    text=PromtRU.YES_BT,
+    callback_data=CancelCallCB.YES_CANCEL_CALL)
+NO_CANCEL_CALL: InlineKeyboardButton = InlineKeyboardButton(
+    text=PromtRU.NO_BT,
+    callback_data=CancelCallCB.NO_CANCEL_CALL)
+yes_no_inkb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+yes_no_inkb_builder.row(YES_CANCEL_CALL, NO_CANCEL_CALL, width=2)
+YES_NO_INKB: InlineKeyboardMarkup = yes_no_inkb_builder.as_markup()
 # === /// ===
