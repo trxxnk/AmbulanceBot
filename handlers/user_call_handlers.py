@@ -1,5 +1,5 @@
+import asyncio
 from aiogram import Router, F
-
 from aiogram.filters import StateFilter, Text, Command
 from aiogram.types import Message, ContentType, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -10,8 +10,6 @@ from DB import USERS, User
 from lexicon.lexicon_ru import BotCommands, PromtRU, GendersRU, AgesRU
 from promotions import PROMTS, IGNORE
 from keyboards.callback_data import CancelCallCB
-
-import time
 
 
 router: Router = Router()
@@ -90,17 +88,16 @@ async def process_get_info(message: Message, state: FSMContext):
 async def process_get_age(callback: CallbackQuery, state: FSMContext):
     await state.update_data(age=callback.data)
     await GetDataFSM.process_next_step(update=callback, state=state)
+    # === Имитация ожидания скорой ===
+    await asyncio.sleep(10) # Возврат в deafualt_state через 10 секунд 
+    await state.set_state(default_state)
+    await PROMTS.WAIT_AMB_END.sendPromt(callback.message)
 
 
 # Ожидание скорой
 @router.message(StateFilter(GetDataFSM.WAIT_AMB))
 async def process_wait_amb(message: Message, state: FSMContext):
     await PROMTS.WAIT_AMB.sendPromt(message)
-    # TODO: Какой-то флаг, что скорая приехала
-    await message.answer(
-        text='Типа скорая приехала')
-    await state.set_state(default_state)
-    await PROMTS.HELP.sendPromt(message)
 
 
 # Дефолтный фильтр

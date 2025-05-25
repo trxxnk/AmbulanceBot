@@ -44,13 +44,13 @@ class GetDataFSM(StatesGroup):
         cur_state: Union[State, None] = await state.get_state()
         num_cur_step: int = GetDataFSM.STATE_NUM[cur_state]
         cur_step: Step = GetDataFSM.NUM_STEP[num_cur_step]
-        print(cur_step.promt)
+        # print(cur_step.promt)
         await cur_step.promt.sendPromt(update)
 
     @classmethod
     async def process_next_step(cls, *, update: Union[Message, CallbackQuery], state: FSMContext) -> None:
         cur_state: State = await state.get_state()
-        print(cur_state)
+        # print(cur_state)
         num_next_step: int = GetDataFSM.STATE_NUM[cur_state] + 1
         next_step: Step = GetDataFSM.NUM_STEP[num_next_step]
         await state.set_state(next_step.state)
